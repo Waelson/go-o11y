@@ -33,8 +33,8 @@ func initTracerAuto() func(context.Context) error {
 	resources, err := resource2.New(
 		context.Background(),
 		resource2.WithAttributes(
-			attribute.String("service.name", "service-b"),
-			attribute.String("application", "orquestrador"),
+			attribute.String("service.name", "orquestrador"),
+			attribute.String("application", "service-b"),
 		),
 	)
 	if err != nil {

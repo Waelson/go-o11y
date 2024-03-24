@@ -6,20 +6,19 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/trace"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"net/url"
-
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
 	resource2 "go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
 )
 
 func initTracerAuto() func(context.Context) error {
@@ -36,8 +35,8 @@ func initTracerAuto() func(context.Context) error {
 	resources, err := resource2.New(
 		context.Background(),
 		resource2.WithAttributes(
-			attribute.String("service.name", "service-a"),
-			attribute.String("application", "input"),
+			attribute.String("service.name", "input"),
+			attribute.String("application", "service-a"),
 		),
 	)
 	if err != nil {
@@ -80,12 +79,21 @@ func main() {
 			return
 		}
 
-		response, status, err := obterClima(c.Request.Context(), endereco.CEP, tracer)
-		if status == http.StatusInternalServerError {
-		} else if status == http.StatusOK {
-			c.JSON(status, response)
+		if len(endereco.CEP) != 8 {
+			c.String(http.StatusUnprocessableEntity, "invalid zipcode")
+			return
+		}
+
+		response, status, _ := obterClima(c.Request.Context(), endereco.CEP, tracer)
+		if status == http.StatusOK {
+			c.Header("Content-Type", "application/json")
+			c.String(http.StatusOK, response)
+		} else if status == http.StatusNotFound {
+			c.String(http.StatusNotFound, "can not find zipcode")
+		} else if status == http.StatusUnprocessableEntity {
+			c.String(http.StatusUnprocessableEntity, "invalid zipcode")
 		} else {
-			_ = c.Error(err)
+			c.String(http.StatusInternalServerError, "internal error")
 		}
 
 	})

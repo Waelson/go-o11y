@@ -6,6 +6,7 @@ import (
 	"github.com/Waelson/go-o11y/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -24,6 +25,12 @@ func (a *applicationController) Handler(c *gin.Context) {
 	var input Input
 	if c.ShouldBind(&input) != nil {
 		c.Error(errors.New("erro ao obter o CEP"))
+	}
+
+	_, err := strconv.ParseInt(input.Cep, 10, 64)
+	if err != nil {
+		c.String(http.StatusUnprocessableEntity, "invalid zipcode")
+		return
 	}
 
 	response, err := a.service.GetTemperature(c.Request.Context(), strings.TrimSpace(input.Cep))
