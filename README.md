@@ -17,7 +17,12 @@ Espere o `docker-compose` construir a aplicação e carregar as dependências. D
 curl -X POST -H "Content-Type: application/json" -d '{"cep": "29902555"}' http://localhost:8080/clima
 ```
 ### Como visualizar os traces?
-Acesse o endereço abaixo em seu browser, clique na opção `Find a trace`, depois no botão `Run query`
+Acesse o endereço abaixo e clique na opção `Find a trace`, depois no botão `Run query`
 ```
 http://127.0.0.1:9411/zipkin/
+```
+
+### Acessar o Grafana
+```
+http://localhost:3000/
 ```

@@ -1,6 +1,7 @@
 version: '3'
 services:
   service-a:
+    container_name: input
     build:
       context: service_a
       dockerfile: Dockerfile
@@ -11,22 +12,25 @@ services:
       - service-b
 
   service-b:
+    container_name: orquestrador
     build:
       context: service_b
       dockerfile: Dockerfile
     ports:
-      - "8081:8081"
+      - "8181:8181"
     depends_on:
       - otel-collector
 
 
   zipkin:
+    container_name: zipkin
     image: openzipkin/zipkin:latest
     restart: always
     ports:
       - "9411:9411"
 
   otel-collector:
+    container_name: otel-collector
     image: otel/opentelemetry-collector:latest
     restart: always
     command: ["--config=/etc/otel-collector-config.yaml"]
@@ -44,6 +48,7 @@ services:
       - zipkin
 
   jaeger:
+    container_name: jaeger
     image: jaegertracing/all-in-one:latest
     restart: always
     ports:
@@ -52,9 +57,19 @@ services:
       - "14250"
 
   prometheus:
+    container_name: prometheus
     image: prom/prometheus:latest
     restart: always
     volumes:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus

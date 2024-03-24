@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
@@ -70,6 +71,10 @@ func main() {
 	r := gin.Default()
 	r.Use(otelgin.Middleware("service-a"))
 
+	r.GET("/metrics", func(c *gin.Context) {
+		h := promhttp.Handler()
+		h.ServeHTTP(c.Writer, c.Request)
+	})
 	r.POST("/clima", func(c *gin.Context) {
 		var endereco Endereco
 

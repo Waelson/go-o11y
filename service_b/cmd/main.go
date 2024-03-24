@@ -8,6 +8,7 @@ import (
 	"github.com/Waelson/go-o11y/internal/requester"
 	"github.com/Waelson/go-o11y/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -70,6 +71,11 @@ func main() {
 
 	r := gin.Default()
 	r.Use(otelgin.Middleware("service-b"))
+
+	r.GET("/metrics", func(c *gin.Context) {
+		h := promhttp.Handler()
+		h.ServeHTTP(c.Writer, c.Request)
+	})
 	r.GET("/temperatura", applicationController.Handler)
 
 	log.Println("Iniciando o servidor na porta 8181...")
